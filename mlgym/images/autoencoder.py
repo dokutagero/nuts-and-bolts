@@ -10,10 +10,10 @@ from dagen.image.image import merge_samples
 
 from ..trainer import train
 
-params = {"nb_epoch" : 20 }
+params = {"nb_epoch" : 10 }
 params["batch_size"] = 8
 
-X_train, Y_train = get_ds_simple(cnt_samples=1000)
+X_train, Y_train = get_ds_simple(cnt_samples=100)
 X_train = np.expand_dims(X_train, axis=1).astype(np.float32) / 255
 Y_train = Y_train[:, np.newaxis]
 print(X_train.shape)
@@ -92,7 +92,7 @@ def main():
     im = merge_samples(X_train[:10], Y_train[:10])
     im.save("/tmp/ae_original.png")
 
-    noisy_X = make_noise(X_train[:10])
+    noisy_X = make_noise(X_train)
     im = merge_samples(noisy_X, Y_train[:10])
     im.save("/tmp/noisy.png")
 
@@ -103,7 +103,8 @@ def main():
     im = merge_samples(generated.data, Y_train)
     im.save("/tmp/ae_untrained.png")
 
-    ds_train = chainer.datasets.tuple_dataset.TupleDataset(X_train, X_train)
+
+    ds_train = chainer.datasets.tuple_dataset.TupleDataset(noisy_X, X_train)
     train(model, ds_train)
 
     generated = net(X_train[:10])
@@ -111,7 +112,7 @@ def main():
     im.save("/tmp/ae_trained.png")
 
     denoised = net(noisy_X)
-    im = merge_samples(denoised.data, Y_train[:10])
+    im = merge_samples(denoised.data[:10], Y_train[:10])
     im.save("/tmp/denoised.png")
 
 
